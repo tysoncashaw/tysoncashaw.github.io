@@ -34,6 +34,7 @@
                         <p class="text-muted font-size-sm">Charlotte, NC</p>
                         <a href="projects.html" class="btn btn-primary">View My Projects</a>
                         <!--<button class="btn btn-outline-primary">Message</button>-->
+                        <button id="openWidget" type="button" class="btn btn-primary">Let's Have Virtual Coffee</button>
                       </div>
                     </div>
                   </div>
@@ -165,6 +166,61 @@
         
         
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
+
+
+<script>
+  async function loadWidget() {
+    try {
+      const res = await fetch('https://api.mikasuedesigns.com/widget/token/public');
+      if (!res.ok) throw new Error(`Widget token request failed: ${res.status} ${res.statusText}`);
+
+      const data = await res.json();
+      if (!data || !data.url) throw new Error('Widget response did not include a valid URL.');
+
+      const url = data.url.startsWith('http') ? data.url : `https://${data.url}`;
+
+      const existingOverlay = document.getElementById('vc-overlay');
+      if (existingOverlay) existingOverlay.remove();
+
+      const overlay = document.createElement('div');
+      overlay.id = 'vc-overlay';
+      overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+      overlay.onclick = function (e) { if (e.target === overlay) overlay.remove(); };
+
+      const modal = document.createElement('div');
+      modal.style.cssText = 'position:relative;background:#fff;border-radius:18px;padding:0;box-shadow:0 24px 60px rgba(0,0,0,0.25);max-width:520px;width:100%;max-height:95vh;overflow:hidden;';
+
+      const closeBtn = document.createElement('button');
+      closeBtn.innerHTML = '&times;';
+      closeBtn.style.cssText = 'position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;border:none;background:#111;color:#fff;font-size:20px;line-height:36px;text-align:center;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.2);z-index:10;';
+      closeBtn.onclick = function () { overlay.remove(); };
+
+      const iframe = document.createElement('iframe');
+      iframe.src = url;
+      iframe.width = 520;
+      iframe.height = 650;
+      iframe.style.cssText = 'border:none;width:100%;height:650px;display:block;border-radius:0 0 18px 18px;';
+      iframe.allow = 'camera;microphone;display-capture';
+
+      modal.appendChild(closeBtn);
+      modal.appendChild(iframe);
+      overlay.appendChild(modal);
+      document.body.appendChild(overlay);
+
+      console.log('Widget opened:', url);
+    } catch (e) {
+      console.error('Widget failed to load:', e);
+      alert('Sorry, the virtual coffee widget could not open. Please check the browser console for details.');
+    }
+  }
+
+  document.getElementById('openWidget').addEventListener('click', loadWidget);
+</script>
+
+
+
+
+
 </body>
 
 </html>
